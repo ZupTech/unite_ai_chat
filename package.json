@@ -28,6 +28,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.18.0",
     "@apidevtools/json-schema-ref-parser": "^11.1.0",
+    "@auth0/auth0-spa-js": "^2.1.3",
     "@azure/openai": "^1.0.0-beta.8",
     "@google/generative-ai": "^0.11.4",
     "@hookform/resolvers": "^3.3.2",
@@ -74,6 +75,7 @@
     "gpt-tokenizer": "^2.1.2",
     "i18next": "^23.7.16",
     "i18next-resources-to-backend": "^1.2.0",
+    "jose": "^5.10.0",
     "langchain": "^0.0.213",
     "lucide-react": "^0.292.0",
     "mammoth": "^1.6.0",
