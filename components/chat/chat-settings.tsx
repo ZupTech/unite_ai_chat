@@ -31,6 +31,21 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
   }
 
   useEffect(() => {
+    if (!chatSettings) {
+      // Set default model
+      setChatSettings({
+        model: "gpt-4o",
+        temperature: 0.7,
+        contextLength: 4096,
+        prompt: "",
+        includeProfileContext: false,
+        includeWorkspaceInstructions: false,
+        embeddingsProvider: "openai"
+      })
+    }
+  }, [])
+
+  useEffect(() => {
     if (!chatSettings) return
 
     setChatSettings({
@@ -73,7 +88,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
           variant="ghost"
         >
           <div className="max-w-[120px] truncate text-lg sm:max-w-[300px] lg:max-w-[500px]">
-            GPT-4o
+            {fullModel?.modelName || chatSettings.model}
           </div>
 
           <IconAdjustmentsHorizontal size={28} />

@@ -6,8 +6,7 @@ import {
   IconFile,
   IconMessage,
   IconPencil,
-  IconRobotFace,
-  IconSparkles
+  IconRobotFace
 } from "@tabler/icons-react"
 import { FC } from "react"
 import { TabsList } from "../ui/tabs"
@@ -46,12 +45,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
         />
 
         <SidebarSwitchItem
-          icon={<IconSparkles size={SIDEBAR_ICON_SIZE} />}
-          contentType="models"
-          onContentTypeChange={onContentTypeChange}
-        />
-
-        <SidebarSwitchItem
           icon={<IconFile size={SIDEBAR_ICON_SIZE} />}
           contentType="files"
           onContentTypeChange={onContentTypeChange}
@@ -68,12 +61,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
           contentType="assistants"
           onContentTypeChange={onContentTypeChange}
         />
-
-        <SidebarSwitchItem
-          icon={<IconBolt size={SIDEBAR_ICON_SIZE} />}
-          contentType="tools"
-          onContentTypeChange={onContentTypeChange}
-        />
       </TabsList>
 
       <div className="flex flex-col items-center space-y-4">
@@ -82,11 +69,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
 
         {/* TODO */}
         {/* <Alerts /> */}
-
-        <WithTooltip
-          display={<div>Profile Settings</div>}
-          trigger={<ProfileSettings />}
-        />
       </div>
     </div>
   )

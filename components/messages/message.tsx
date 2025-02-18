@@ -183,7 +183,9 @@ export const Message: FC<MessageProps> = ({
     <div
       className={cn(
         "flex w-full justify-center",
-        message.role === "user" ? "" : "bg-secondary"
+        message.role === "user"
+          ? "rounded-full bg-transparent"
+          : "bg-transparent"
       )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -201,9 +203,14 @@ export const Message: FC<MessageProps> = ({
             onRegenerate={handleRegenerate}
           />
         </div>
-        <div className="space-y-3">
+        <div
+          className={cn(
+            "space-y-3",
+            message.role === "user" && "flex flex-col items-end"
+          )}
+        >
           {message.role === "system" ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 p-10">
               <IconPencil
                 className="border-primary bg-primary text-secondary rounded border-DEFAULT p-1"
                 size={ICON_SIZE}
@@ -238,19 +245,8 @@ export const Message: FC<MessageProps> = ({
                     }
                   />
                 )
-              ) : profile?.image_url ? (
-                <Image
-                  className={`size-[32px] rounded`}
-                  src={profile?.image_url}
-                  height={32}
-                  width={32}
-                  alt="user image"
-                />
               ) : (
-                <IconMoodSmile
-                  className="bg-primary text-secondary border-primary rounded border-DEFAULT p-1"
-                  size={ICON_SIZE}
-                />
+                <div className="bg-primary text-secondary rounded-full p-0"></div>
               )}
 
               <div className="font-semibold">
