@@ -39,10 +39,10 @@ export async function POST(request: Request) {
     }
 
     const azureOpenai = new OpenAI({
-      apiKey: KEY,
+      apiKey: KEY || "",
       baseURL: `${ENDPOINT}/openai/deployments/${DEPLOYMENT_ID}`,
       defaultQuery: { "api-version": "2023-12-01-preview" },
-      defaultHeaders: { "api-key": KEY }
+      defaultHeaders: { "api-key": KEY || "" }
     })
 
     const response = await azureOpenai.chat.completions.create({

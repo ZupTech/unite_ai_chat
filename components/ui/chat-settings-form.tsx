@@ -9,11 +9,13 @@ import { Label } from "./label"
 interface ChatSettingsFormProps {
   chatSettings: ChatSettings
   onChangeChatSettings: (value: ChatSettings) => void
+  useAdvancedDropdown?: boolean
 }
 
 export const ChatSettingsForm: FC<ChatSettingsFormProps> = ({
   chatSettings,
-  onChangeChatSettings
+  onChangeChatSettings,
+  useAdvancedDropdown = false
 }) => {
   const { profile } = useContext(ChatbotUIContext)
 
