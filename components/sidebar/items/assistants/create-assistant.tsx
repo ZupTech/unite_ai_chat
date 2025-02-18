@@ -88,12 +88,7 @@ export const CreateAssistant: FC<CreateAssistantProps> = ({
   const checkIfModelIsToolCompatible = () => {
     if (!assistantChatSettings.model) return false
 
-    const compatibleModels = [
-      "gpt-4-turbo-preview",
-      "gpt-4-vision-preview",
-      "gpt-3.5-turbo-1106",
-      "gpt-4"
-    ]
+    const compatibleModels = ["gpt-4o"]
     const isModelCompatible = compatibleModels.includes(
       assistantChatSettings.model
     )

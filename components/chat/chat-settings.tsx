@@ -73,7 +73,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
           variant="ghost"
         >
           <div className="max-w-[120px] truncate text-lg sm:max-w-[300px] lg:max-w-[500px]">
-            {fullModel?.modelName || chatSettings.model}
+            gpt-4o
           </div>
 
           <IconAdjustmentsHorizontal size={28} />

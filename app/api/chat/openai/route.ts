@@ -15,24 +15,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    const profile = await getServerProfile()
+    const openaiApiKey = process.env.OPENAI_API_KEY
+    const openaiOrgId = process.env.OPENAI_ORGANIZATION_ID
 
-    checkApiKey(profile.openai_api_key, "OpenAI")
+    checkApiKey(openaiApiKey ?? null, "OpenAI")
 
     const openai = new OpenAI({
-      apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+      apiKey: openaiApiKey || "",
+      organization: openaiOrgId
     })
 
     const response = await openai.chat.completions.create({
       model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
       messages: messages as ChatCompletionCreateParamsBase["messages"],
       temperature: chatSettings.temperature,
-      max_tokens:
-        chatSettings.model === "gpt-4-vision-preview" ||
-        chatSettings.model === "gpt-4o"
-          ? 4096
-          : null, // TODO: Fix
+      max_tokens: chatSettings.model === "gpt-4o" ? 4096 : null, // TODO: Fix
       stream: true
     })
 

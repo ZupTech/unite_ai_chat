@@ -3,7 +3,7 @@ INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, e
 
 -- Start data for workspaces 
 INSERT INTO workspaces (user_id, name, description, default_context_length, default_model, default_prompt, default_temperature, include_profile_context, include_workspace_instructions, instructions, is_home, sharing, embeddings_provider) VALUES 
-('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'Workspace 1', 'This is for testing.', 4000, 'gpt-4-turbo-preview', 'You are an assistant.', 0.5, true, true, 'These are the instructions.', false, 'private', 'openai');
+('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'Workspace 1', 'This is for testing.', 4000, 'gpt-4o', 'You are an assistant.', 0.5, true, true, 'These are the instructions.', false, 'private', 'openai');
 
 -- Get workspace ids
 DO $$
@@ -42,7 +42,7 @@ BEGIN
 
   -- start data for presets
   INSERT INTO presets (user_id, created_at, updated_at, sharing, include_profile_context, include_workspace_instructions, context_length, model, name, prompt, temperature, description, embeddings_provider) VALUES
-  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'private', TRUE, TRUE, 4000, 'gpt-4-turbo-preview', 'Preset 1', 'Prompt 1', 0.5, 'Description for Preset 1', 'openai');
+  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'private', TRUE, TRUE, 4000, 'gpt-4o', 'Preset 1', 'Prompt 1', 0.5, 'Description for Preset 1', 'openai');
 
   -- Get preset id
   DECLARE
@@ -57,7 +57,7 @@ BEGIN
 
   -- Start data for assistants 
   INSERT INTO assistants (user_id, name, description, model, image_path, sharing, context_length, include_profile_context, include_workspace_instructions, prompt, temperature, embeddings_provider) VALUES 
-  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'Albert Einstein', 'This is an Albert Einstein assistant.', 'gpt-4-turbo-preview', '', 'private', 4000, TRUE, TRUE, 'You are Albert Einstein.', 0.5, 'openai');
+  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'Albert Einstein', 'This is an Albert Einstein assistant.', 'gpt-4o', '', 'private', 4000, TRUE, TRUE, 'You are Albert Einstein.', 0.5, 'openai');
 
   -- Get assistant id
   DECLARE
@@ -72,7 +72,7 @@ BEGIN
 
   -- Start data for chats 
   INSERT INTO chats (user_id, workspace_id, name, model, prompt, temperature, context_length, include_profile_context, include_workspace_instructions, embeddings_provider) VALUES 
-  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', workspace1_id, 'Chat 1', 'gpt-4-turbo-preview', 'You are an assistant.', 0.5, 4000, TRUE, TRUE, 'openai');
+  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', workspace1_id, 'Chat 1', 'gpt-4o', 'You are an assistant.', 0.5, 4000, TRUE, TRUE, 'openai');
 
   DECLARE
     folder1_id UUID;
