@@ -37,6 +37,10 @@ export async function POST(request: Request) {
     const xanoUser = await xanoResponse.json()
     console.log("Xano user data:", xanoUser)
 
+    // Criar senha consistente baseada no ID do Xano
+    const userPassword = `xano_${xanoUser.id}_${process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 8)}`
+    console.log("Generated password:", userPassword)
+
     // 2. Verificar se usuário existe no auth do Supabase
     console.log("Checking if user exists in Supabase auth...")
     const {
@@ -53,7 +57,6 @@ export async function POST(request: Request) {
     console.log("Existing auth user:", authUser)
 
     let userId = authUser?.id
-    const randomPassword = Math.random().toString(36).slice(-8)
 
     if (!userId) {
       console.log("Creating new user in Supabase...")
@@ -62,7 +65,7 @@ export async function POST(request: Request) {
       const { data: newUser, error: createError } =
         await supabaseAdmin.auth.admin.createUser({
           email: xanoUser.email,
-          password: randomPassword,
+          password: userPassword,
           email_confirm: true,
           user_metadata: {
             xano_id: xanoUser.id,
@@ -77,26 +80,47 @@ export async function POST(request: Request) {
 
       console.log("New user created:", newUser)
       userId = newUser.user.id
+    } else {
+      // Se o usuário já existe, atualizar a senha
+      console.log("Updating existing user password...")
+      const { error: updateError } =
+        await supabaseAdmin.auth.admin.updateUserById(userId, {
+          password: userPassword
+        })
+
+      if (updateError) {
+        console.error("Error updating user password:", updateError)
+        throw updateError
+      }
+      console.log("User password updated successfully")
     }
 
-    // Gerar link de autenticação
-    const { data, error: linkError } =
-      await supabaseAdmin.auth.admin.generateLink({
-        type: "magiclink",
-        email: xanoUser.email
+    // Criar cliente Supabase normal
+    console.log("Creating Supabase client...")
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    // Fazer login com email/senha
+    console.log("Attempting to sign in with credentials...")
+    const { data: session, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: xanoUser.email,
+        password: userPassword
       })
 
-    if (linkError) {
-      console.error("Error generating link:", linkError)
-      throw linkError
+    if (signInError) {
+      console.error("Sign in error:", signInError)
+      throw signInError
     }
 
-    // Criar sessão usando o token gerado
-    const { data: session } = await supabaseAdmin.auth.signInWithPassword({
-      email: xanoUser.email,
-      password: randomPassword
-    })
+    if (!session) {
+      console.error("No session returned after sign in")
+      throw new Error("No session returned after sign in")
+    }
 
+    console.log("Sign in successful, returning session")
     return NextResponse.json(session)
   } catch (error: any) {
     console.error("Auth error:", error)

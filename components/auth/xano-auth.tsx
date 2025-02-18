@@ -72,11 +72,17 @@ export const XanoAuth = () => {
       const session = await response.json()
       console.log("Received session:", session)
 
+      if (!session?.session?.access_token || !session?.session?.refresh_token) {
+        console.error("Invalid session received:", session)
+        router.push("/login")
+        return
+      }
+
       // 3. Setar a sessão no Supabase
       console.log("Setting Supabase session...")
       await supabase.auth.setSession({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token
+        access_token: session.session.access_token,
+        refresh_token: session.session.refresh_token
       })
 
       // Marcar como autenticado
