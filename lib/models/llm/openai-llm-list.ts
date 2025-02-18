@@ -18,4 +18,19 @@ const GPT4o: LLM = {
   }
 }
 
-export const OPENAI_LLM_LIST: LLM[] = [GPT4o]
+const GPT4oMini: LLM = {
+  modelId: "gpt-4o-mini",
+  modelName: "GPT-4o Mini",
+  provider: "openai",
+  hostedId: "gpt-4o-mini",
+  platformLink: OPENAI_PLATORM_LINK,
+  imageInput: true,
+  pricing: {
+    currency: "USD",
+    unit: "1M tokens",
+    inputCost: 3,
+    outputCost: 9
+  }
+}
+
+export const OPENAI_LLM_LIST: LLM[] = [GPT4o, GPT4oMini]

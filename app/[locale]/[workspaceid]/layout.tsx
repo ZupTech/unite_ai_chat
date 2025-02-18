@@ -19,6 +19,7 @@ import { LLMID } from "@/types"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
+import { AutoRefresh } from "@/components/utility/auto-refresh"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
@@ -26,7 +27,6 @@ interface WorkspaceLayoutProps {
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const router = useRouter()
-
   const params = useParams()
   const searchParams = useSearchParams()
   const workspaceId = params.workspaceid as string
@@ -45,6 +45,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setModels,
     selectedWorkspace,
     setSelectedWorkspace,
+    workspaces,
     setSelectedChat,
     setChatMessages,
     setUserInput,
@@ -58,124 +59,140 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   } = useContext(ChatbotUIContext)
 
   const [loading, setLoading] = useState(true)
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
-    ;(async () => {
+    const checkAuth = async () => {
       const session = (await supabase.auth.getSession()).data.session
-
       if (!session) {
-        return router.push("/login")
-      } else {
-        await fetchWorkspaceData(workspaceId)
+        console.log("No session found, redirecting to login")
+        router.push("/login")
+        return false
       }
-    })()
-  }, [])
-
-  useEffect(() => {
-    ;(async () => await fetchWorkspaceData(workspaceId))()
-
-    setUserInput("")
-    setChatMessages([])
-    setSelectedChat(null)
-
-    setIsGenerating(false)
-    setFirstTokenReceived(false)
-
-    setChatFiles([])
-    setChatImages([])
-    setNewMessageFiles([])
-    setNewMessageImages([])
-    setShowFilesDisplay(false)
-  }, [workspaceId])
-
-  const fetchWorkspaceData = async (workspaceId: string) => {
-    setLoading(true)
-
-    const workspace = await getWorkspaceById(workspaceId)
-    setSelectedWorkspace(workspace)
-
-    const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
-    setAssistants(assistantData.assistants)
-
-    for (const assistant of assistantData.assistants) {
-      let url = ""
-
-      if (assistant.image_path) {
-        url = (await getAssistantImageFromStorage(assistant.image_path)) || ""
-      }
-
-      if (url) {
-        const response = await fetch(url)
-        const blob = await response.blob()
-        const base64 = await convertBlobToBase64(blob)
-
-        setAssistantImages(prev => [
-          ...prev,
-          {
-            assistantId: assistant.id,
-            path: assistant.image_path,
-            base64,
-            url
-          }
-        ])
-      } else {
-        setAssistantImages(prev => [
-          ...prev,
-          {
-            assistantId: assistant.id,
-            path: assistant.image_path,
-            base64: "",
-            url
-          }
-        ])
-      }
+      return true
     }
 
-    const chats = await getChatsByWorkspaceId(workspaceId)
-    setChats(chats)
+    const init = async () => {
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) return
 
-    const collectionData =
-      await getCollectionWorkspacesByWorkspaceId(workspaceId)
-    setCollections(collectionData.collections)
+      // Se já temos o workspace correto carregado, não fazer nada
+      if (selectedWorkspace?.id === workspaceId && initialized) {
+        console.log("Workspace already loaded:", workspaceId)
+        setLoading(false)
+        return
+      }
 
-    const folders = await getFoldersByWorkspaceId(workspaceId)
-    setFolders(folders)
+      // Se temos workspaces mas não o selecionado, tentar encontrar
+      if (workspaces?.length > 0 && !selectedWorkspace) {
+        const workspace = workspaces.find(w => w.id === workspaceId)
+        if (workspace) {
+          console.log("Found workspace in existing workspaces:", workspace)
+          setSelectedWorkspace(workspace)
+          setInitialized(true)
+          setLoading(false)
+          return
+        }
+      }
 
-    const fileData = await getFileWorkspacesByWorkspaceId(workspaceId)
-    setFiles(fileData.files)
+      console.log("Fetching workspace data...")
+      await fetchWorkspaceData(workspaceId)
+      setInitialized(true)
+      setLoading(false)
+    }
 
-    const presetData = await getPresetWorkspacesByWorkspaceId(workspaceId)
-    setPresets(presetData.presets)
+    init()
+  }, [workspaceId, selectedWorkspace?.id])
 
-    const promptData = await getPromptWorkspacesByWorkspaceId(workspaceId)
-    setPrompts(promptData.prompts)
+  const fetchWorkspaceData = async (workspaceId: string) => {
+    console.log("Fetching workspace:", workspaceId)
 
-    const toolData = await getToolWorkspacesByWorkspaceId(workspaceId)
-    setTools(toolData.tools)
+    try {
+      const workspace = await getWorkspaceById(workspaceId)
+      if (!workspace) {
+        console.error("Workspace not found")
+        router.push("/login")
+        return
+      }
 
-    const modelData = await getModelWorkspacesByWorkspaceId(workspaceId)
-    setModels(modelData.models)
+      console.log("Setting selected workspace:", workspace)
+      setSelectedWorkspace(workspace)
 
-    setChatSettings({
-      model: (searchParams.get("model") || "gpt-4o") as LLMID,
-      prompt:
-        workspace?.default_prompt ||
-        "You are a friendly, helpful AI assistant.",
-      temperature: workspace?.default_temperature || 0.5,
-      contextLength: workspace?.default_context_length || 4096,
-      includeProfileContext: workspace?.include_profile_context || true,
-      includeWorkspaceInstructions:
-        workspace?.include_workspace_instructions || true,
-      embeddingsProvider:
-        (workspace?.embeddings_provider as "openai" | "local") || "openai"
-    })
+      const [
+        assistantWorkspaces,
+        chatWorkspaces,
+        collectionWorkspaces,
+        fileWorkspaces,
+        folderWorkspaces,
+        presetWorkspaces,
+        promptWorkspaces,
+        toolWorkspaces,
+        modelWorkspaces
+      ] = await Promise.all([
+        getAssistantWorkspacesByWorkspaceId(workspaceId),
+        getChatsByWorkspaceId(workspaceId),
+        getCollectionWorkspacesByWorkspaceId(workspaceId),
+        getFileWorkspacesByWorkspaceId(workspaceId),
+        getFoldersByWorkspaceId(workspaceId),
+        getPresetWorkspacesByWorkspaceId(workspaceId),
+        getPromptWorkspacesByWorkspaceId(workspaceId),
+        getToolWorkspacesByWorkspaceId(workspaceId),
+        getModelWorkspacesByWorkspaceId(workspaceId)
+      ])
 
-    setLoading(false)
+      setAssistants(assistantWorkspaces.assistants || [])
+      setChats(chatWorkspaces)
+      setCollections(collectionWorkspaces.collections || [])
+      setFiles(fileWorkspaces.files || [])
+      setFolders(folderWorkspaces)
+      setPresets(presetWorkspaces.presets || [])
+      setPrompts(promptWorkspaces.prompts || [])
+      setTools(toolWorkspaces.tools || [])
+      setModels(modelWorkspaces.models || [])
+
+      setChatSettings({
+        model: "gpt-4o" as LLMID,
+        prompt:
+          workspace.default_prompt ||
+          "You are a friendly, helpful AI assistant.",
+        temperature: workspace.default_temperature || 0.5,
+        contextLength: workspace.default_context_length || 4096,
+        includeProfileContext: workspace.include_profile_context || true,
+        includeWorkspaceInstructions:
+          workspace.include_workspace_instructions || true,
+        embeddingsProvider:
+          (workspace.embeddings_provider as "openai" | "local") || "openai"
+      })
+
+      // Reset chat state
+      setUserInput("")
+      setChatMessages([])
+      setSelectedChat(null)
+      setIsGenerating(false)
+      setFirstTokenReceived(false)
+      setChatFiles([])
+      setChatImages([])
+      setNewMessageFiles([])
+      setNewMessageImages([])
+      setShowFilesDisplay(false)
+    } catch (error) {
+      console.error("Error fetching workspace data:", error)
+      router.push("/login")
+    }
   }
 
   if (loading) {
-    return <Loading />
+    return (
+      <div className="size-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
   }
 
-  return <Dashboard>{children}</Dashboard>
+  return (
+    <>
+      <AutoRefresh />
+      <Dashboard>{children}</Dashboard>
+    </>
+  )
 }

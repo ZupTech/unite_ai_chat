@@ -32,8 +32,43 @@ interface GlobalStateProps {
   children: React.ReactNode
 }
 
+function usePersistedState<T>(key: string, defaultValue: T) {
+  const [state, setState] = useState<T>(defaultValue)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Carregar do localStorage na montagem
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(key)
+        if (saved) {
+          setState(JSON.parse(saved))
+        }
+        setIsInitialized(true)
+      } catch (err) {
+        console.warn("Error reading from localStorage:", err)
+        setIsInitialized(true)
+      }
+    }
+  }, [key])
+
+  // Salvar no localStorage quando mudar
+  useEffect(() => {
+    if (isInitialized && typeof window !== "undefined") {
+      try {
+        localStorage.setItem(key, JSON.stringify(state))
+      } catch (err) {
+        console.warn("Error writing to localStorage:", err)
+      }
+    }
+  }, [key, state, isInitialized])
+
+  return [state, setState, isInitialized] as const
+}
+
 export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
 
   // PROFILE STORE
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null)
@@ -48,7 +83,15 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [presets, setPresets] = useState<Tables<"presets">[]>([])
   const [prompts, setPrompts] = useState<Tables<"prompts">[]>([])
   const [tools, setTools] = useState<Tables<"tools">[]>([])
-  const [workspaces, setWorkspaces] = useState<Tables<"workspaces">[]>([])
+  const [workspaces, setWorkspaces, workspacesInitialized] = usePersistedState<
+    Tables<"workspaces">[]
+  >("workspaces", [])
+  const [
+    selectedWorkspace,
+    setSelectedWorkspace,
+    selectedWorkspaceInitialized
+  ] = usePersistedState<Tables<"workspaces"> | null>("selectedWorkspace", null)
+  const [workspaceImages, setWorkspaceImages] = useState<WorkspaceImage[]>([])
 
   // MODELS STORE
   const [envKeyMap, setEnvKeyMap] = useState<Record<string, VALID_ENV_KEYS>>({})
@@ -57,11 +100,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [availableOpenRouterModels, setAvailableOpenRouterModels] = useState<
     OpenRouterLLM[]
   >([])
-
-  // WORKSPACE STORE
-  const [selectedWorkspace, setSelectedWorkspace] =
-    useState<Tables<"workspaces"> | null>(null)
-  const [workspaceImages, setWorkspaceImages] = useState<WorkspaceImage[]>([])
 
   // PRESET STORE
   const [selectedPreset, setSelectedPreset] =
@@ -124,6 +162,62 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [toolInUse, setToolInUse] = useState<string>("none")
 
   useEffect(() => {
+    const initializeState = async () => {
+      if (!workspacesInitialized || !selectedWorkspaceInitialized) {
+        return
+      }
+
+      try {
+        const session = (await supabase.auth.getSession()).data.session
+        if (!session) {
+          setIsLoading(false)
+          return
+        }
+
+        const profile = await getProfileByUserId(session.user.id)
+        if (!profile) {
+          setIsLoading(false)
+          return
+        }
+
+        setProfile(profile)
+
+        if (!profile.has_onboarded) {
+          router.push("/setup")
+          return
+        }
+
+        // Só buscar workspaces se ainda não tivermos nenhum
+        if (!workspaces || workspaces.length === 0) {
+          console.log("Fetching workspaces in GlobalState...")
+          const fetchedWorkspaces = await getWorkspacesByUserId(session.user.id)
+
+          if (fetchedWorkspaces.length > 0) {
+            console.log("Setting workspaces:", fetchedWorkspaces)
+            setWorkspaces(fetchedWorkspaces)
+
+            // Se não temos um workspace selecionado, selecionar o home
+            if (!selectedWorkspace) {
+              const homeWorkspace = fetchedWorkspaces.find(w => w.is_home)
+              if (homeWorkspace) {
+                console.log("Setting home workspace:", homeWorkspace)
+                setSelectedWorkspace(homeWorkspace)
+              }
+            }
+          }
+        }
+
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Error initializing state:", error)
+        setIsLoading(false)
+      }
+    }
+
+    initializeState()
+  }, [workspacesInitialized, selectedWorkspaceInitialized])
+
+  useEffect(() => {
     ;(async () => {
       const profile = await fetchStartingData()
 
@@ -165,36 +259,57 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         return router.push("/setup")
       }
 
-      const workspaces = await getWorkspacesByUserId(user.id)
-      setWorkspaces(workspaces)
+      // Só buscar workspaces se ainda não tivermos nenhum
+      if (!workspaces || workspaces.length === 0) {
+        console.log("Fetching workspaces in GlobalState...")
+        const workspaces = await getWorkspacesByUserId(user.id)
+        setWorkspaces(workspaces)
 
-      for (const workspace of workspaces) {
-        let workspaceImageUrl = ""
-
-        if (workspace.image_path) {
-          workspaceImageUrl =
-            (await getWorkspaceImageFromStorage(workspace.image_path)) || ""
+        // Se não temos um workspace selecionado, selecionar o home
+        if (!selectedWorkspace) {
+          const homeWorkspace = workspaces.find(w => w.is_home)
+          if (homeWorkspace) {
+            console.log("Setting home workspace in GlobalState:", homeWorkspace)
+            setSelectedWorkspace(homeWorkspace)
+          }
         }
 
-        if (workspaceImageUrl) {
-          const response = await fetch(workspaceImageUrl)
-          const blob = await response.blob()
-          const base64 = await convertBlobToBase64(blob)
+        for (const workspace of workspaces) {
+          let workspaceImageUrl = ""
 
-          setWorkspaceImages(prev => [
-            ...prev,
-            {
-              workspaceId: workspace.id,
-              path: workspace.image_path,
-              base64: base64,
-              url: workspaceImageUrl
-            }
-          ])
+          if (workspace.image_path) {
+            workspaceImageUrl =
+              (await getWorkspaceImageFromStorage(workspace.image_path)) || ""
+          }
+
+          if (workspaceImageUrl) {
+            const response = await fetch(workspaceImageUrl)
+            const blob = await response.blob()
+            const base64 = await convertBlobToBase64(blob)
+
+            setWorkspaceImages(prev => [
+              ...prev,
+              {
+                workspaceId: workspace.id,
+                path: workspace.image_path,
+                base64: base64,
+                url: workspaceImageUrl
+              }
+            ])
+          }
         }
       }
 
       return profile
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="size-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
   }
 
   return (

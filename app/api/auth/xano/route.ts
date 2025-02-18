@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
+import { Tables } from "@/supabase/types"
+import { createWorkspace } from "@/db/workspaces"
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +15,136 @@ const supabaseAdmin = createClient(
 )
 
 const XANO_ENDPOINT = "https://xxn3-inb4-ecxi.n7d.xano.io/api:MZh6mH2f/auth/me"
+
+const setupDefaultProfile = async (userId: string, xanoUser: any) => {
+  try {
+    console.log("Setting up default profile for user:", userId)
+
+    // 1. Criar ou atualizar perfil
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .single()
+
+    if (profileError) {
+      console.log("Profile not found, creating new profile...")
+      const username = `user_${userId.slice(0, 8)}`
+      const { error: createError } = await supabaseAdmin
+        .from("profiles")
+        .insert({
+          user_id: userId,
+          has_onboarded: true,
+          display_name: xanoUser.name || "User",
+          username: username,
+          bio: "AI Chat User",
+          profile_context: "Default profile context",
+          use_azure_openai: false,
+          image_url: "",
+          image_path: "",
+          openai_api_key: process.env.OPENAI_API_KEY || "",
+          openai_organization_id: process.env.OPENAI_ORG_ID || "",
+          anthropic_api_key: process.env.ANTHROPIC_API_KEY || "",
+          google_gemini_api_key: process.env.GOOGLE_GEMINI_API_KEY || "",
+          mistral_api_key: process.env.MISTRAL_API_KEY || "",
+          groq_api_key: process.env.GROQ_API_KEY || "",
+          perplexity_api_key: process.env.PERPLEXITY_API_KEY || "",
+          openrouter_api_key: process.env.OPENROUTER_API_KEY || "",
+          azure_openai_api_key: "",
+          azure_openai_endpoint: "",
+          azure_openai_35_turbo_id: "",
+          azure_openai_45_turbo_id: "",
+          azure_openai_45_vision_id: "",
+          azure_openai_embeddings_id: ""
+        })
+
+      if (createError) throw createError
+    } else if (!profile.has_onboarded) {
+      // Update existing profile
+      const { error: updateError } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          has_onboarded: true,
+          display_name: profile.username || xanoUser.name || "User",
+          bio: "AI Chat User",
+          profile_context: "Default profile context",
+          use_azure_openai: false,
+          openai_api_key: process.env.OPENAI_API_KEY || "",
+          openai_organization_id: process.env.OPENAI_ORG_ID || "",
+          anthropic_api_key: process.env.ANTHROPIC_API_KEY || "",
+          google_gemini_api_key: process.env.GOOGLE_GEMINI_API_KEY || "",
+          mistral_api_key: process.env.MISTRAL_API_KEY || "",
+          groq_api_key: process.env.GROQ_API_KEY || "",
+          perplexity_api_key: process.env.PERPLEXITY_API_KEY || "",
+          openrouter_api_key: process.env.OPENROUTER_API_KEY || "",
+          azure_openai_api_key: "",
+          azure_openai_endpoint: "",
+          azure_openai_35_turbo_id: "",
+          azure_openai_45_turbo_id: "",
+          azure_openai_45_vision_id: "",
+          azure_openai_embeddings_id: ""
+        })
+        .eq("id", profile.id)
+
+      if (updateError) throw updateError
+    }
+
+    // 2. Verificar se já existe um workspace home
+    console.log("Checking for home workspace...")
+    const { data: existingWorkspaces, error: workspacesError } =
+      await supabaseAdmin
+        .from("workspaces")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("is_home", true)
+
+    if (workspacesError) throw workspacesError
+
+    if (!existingWorkspaces || existingWorkspaces.length === 0) {
+      console.log("No home workspace found, creating one...")
+      const { error: createWorkspaceError } = await supabaseAdmin
+        .from("workspaces")
+        .insert({
+          user_id: userId,
+          is_home: true,
+          name: "Home",
+          default_context_length: 4096,
+          default_model: "gpt-4o",
+          default_prompt: "You are a friendly, helpful AI assistant.",
+          default_temperature: 0.5,
+          description: "My home workspace.",
+          embeddings_provider: "openai",
+          include_profile_context: true,
+          include_workspace_instructions: true,
+          instructions: "",
+          sharing: "private"
+        })
+
+      if (createWorkspaceError) {
+        console.error("Error creating workspace:", createWorkspaceError)
+        throw createWorkspaceError
+      }
+    }
+
+    // 3. Verificar se o workspace foi criado
+    const { data: finalCheck, error: finalCheckError } = await supabaseAdmin
+      .from("workspaces")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_home", true)
+      .single()
+
+    if (finalCheckError || !finalCheck) {
+      console.error("Final workspace check failed:", finalCheckError)
+      throw new Error("Failed to verify workspace creation")
+    }
+
+    console.log("Setup completed successfully")
+  } catch (error) {
+    console.error("Error in setupDefaultProfile:", error)
+    throw error
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -48,20 +180,15 @@ export async function POST(request: Request) {
       error: listError
     } = await supabaseAdmin.auth.admin.listUsers()
 
-    if (listError) {
-      console.error("Error listing users:", listError)
-      throw listError
-    }
+    if (listError) throw listError
 
-    const authUser = users.find(u => u.email === xanoUser.email)
-    console.log("Existing auth user:", authUser)
+    const existingUser = users.find(u => u.email === xanoUser.email)
+    console.log("Existing user:", existingUser)
 
-    let userId = authUser?.id
+    let userId: string
 
-    if (!userId) {
+    if (!existingUser) {
       console.log("Creating new user in Supabase...")
-
-      // Criar novo usuário se não existir
       const { data: newUser, error: createError } =
         await supabaseAdmin.auth.admin.createUser({
           email: xanoUser.email,
@@ -73,36 +200,29 @@ export async function POST(request: Request) {
           }
         })
 
-      if (createError) {
-        console.error("Error creating user:", createError)
-        throw createError
-      }
-
-      console.log("New user created:", newUser)
+      if (createError) throw createError
       userId = newUser.user.id
     } else {
-      // Se o usuário já existe, atualizar a senha
+      userId = existingUser.id
       console.log("Updating existing user password...")
       const { error: updateError } =
         await supabaseAdmin.auth.admin.updateUserById(userId, {
           password: userPassword
         })
 
-      if (updateError) {
-        console.error("Error updating user password:", updateError)
-        throw updateError
-      }
-      console.log("User password updated successfully")
+      if (updateError) throw updateError
     }
 
-    // Criar cliente Supabase normal
-    console.log("Creating Supabase client...")
+    // Setup default profile and workspace
+    console.log("Setting up default profile and workspace...")
+    await setupDefaultProfile(userId, xanoUser)
+
+    // Fazer login com email/senha
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    // Fazer login com email/senha
     console.log("Attempting to sign in with credentials...")
     const { data: session, error: signInError } =
       await supabase.auth.signInWithPassword({
@@ -110,15 +230,8 @@ export async function POST(request: Request) {
         password: userPassword
       })
 
-    if (signInError) {
-      console.error("Sign in error:", signInError)
-      throw signInError
-    }
-
-    if (!session) {
-      console.error("No session returned after sign in")
-      throw new Error("No session returned after sign in")
-    }
+    if (signInError) throw signInError
+    if (!session) throw new Error("No session returned after sign in")
 
     console.log("Sign in successful, returning session")
     return NextResponse.json(session)
