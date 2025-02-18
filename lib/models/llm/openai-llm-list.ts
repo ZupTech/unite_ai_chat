@@ -28,8 +28,8 @@ const GPT4oMini: LLM = {
   pricing: {
     currency: "USD",
     unit: "1M tokens",
-    inputCost: 3,
-    outputCost: 9
+    inputCost: 0.15,
+    outputCost: 0.6
   }
 }
 
