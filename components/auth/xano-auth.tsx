@@ -13,21 +13,11 @@ export const XanoAuth = () => {
     useContext(ChatbotUIContext)
 
   const getAuthToken = () => {
-    // 1. Primeiro tentar pegar da URL
-    const tokenFromUrl = searchParams.get("token")
-    if (tokenFromUrl) {
-      // Se encontrou na URL, salva no localStorage para futuras verificações
-      localStorage.setItem("authToken", tokenFromUrl)
-      // Remove o token da URL para não ficar exposto
-      router.replace("/")
-      return tokenFromUrl
-    }
-
-    // 2. Tentar pegar do localStorage
+    // 1. Tentar pegar do localStorage
     const localToken = localStorage.getItem("authToken")
     if (localToken) return localToken
 
-    // 3. Se não encontrar, tentar pegar dos cookies
+    // 2. Se não encontrar, tentar pegar dos cookies
     const cookies = document.cookie.split(";")
     const authCookie = cookies.find(cookie =>
       cookie.trim().startsWith("authToken=")
