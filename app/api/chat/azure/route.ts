@@ -49,11 +49,11 @@ export async function POST(request: Request) {
       model: DEPLOYMENT_ID as ChatCompletionCreateParamsBase["model"],
       messages: messages as ChatCompletionCreateParamsBase["messages"],
       temperature: chatSettings.temperature,
-      max_tokens: chatSettings.model === "gpt-4o" ? 4096 : null, // TODO: Fix
+      max_tokens: chatSettings.model === "gpt-4o" ? 4096 : null,
       stream: true
     })
 
-    const stream = OpenAIStream(response)
+    const stream = OpenAIStream(response as any)
 
     return new StreamingTextResponse(stream)
   } catch (error: any) {
