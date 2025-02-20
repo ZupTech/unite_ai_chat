@@ -10,6 +10,7 @@ import { Inter } from "next/font/google"
 import { cookies } from "next/headers"
 import { ReactNode } from "react"
 import "./globals.css"
+import { AuthHandler } from "@/components/auth-handler"
 
 const inter = Inter({ subsets: ["latin"] })
 const APP_NAME = "Unite AI Chat"
@@ -97,7 +98,9 @@ export default async function RootLayout({
           >
             <Toaster richColors position="top-center" duration={3000} />
             <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
-              {session ? <GlobalState>{children}</GlobalState> : children}
+              <GlobalState>
+                <AuthHandler>{children}</AuthHandler>
+              </GlobalState>
             </div>
           </TranslationsProvider>
         </Providers>
