@@ -16,7 +16,7 @@ const inter = Inter({ subsets: ["latin"] })
 const APP_NAME = "Unite AI Chat"
 const APP_DEFAULT_TITLE = "Unite AI Chat"
 const APP_TITLE_TEMPLATE = "%s - Unite AI Chat"
-const APP_DESCRIPTION = "Unite AI Chat"
+const APP_DESCRIPTION = "Unite AI"
 
 interface RootLayoutProps {
   children: ReactNode
