@@ -6,7 +6,7 @@ const OPENROUTER_PLATFORM_LINK = "https://openrouter.ai/docs"
 const CLAUDE_3_OPUS: LLM = {
   modelId: "op_anthropic/claude-3-opus",
   modelName: "Claude 3 Opus",
-  provider: "openrouter",
+  provider: "openrouter" as const,
   hostedId: "anthropic/claude-3-opus",
   platformLink: OPENROUTER_PLATFORM_LINK,
   imageInput: true
@@ -15,10 +15,10 @@ const CLAUDE_3_OPUS: LLM = {
 const CLAUDE_3_SONNET: LLM = {
   modelId: "op_anthropic/claude-3-sonnet",
   modelName: "Claude 3 Sonnet",
-  provider: "openrouter",
+  provider: "openrouter" as const,
   hostedId: "anthropic/claude-3-sonnet",
   platformLink: OPENROUTER_PLATFORM_LINK,
   imageInput: true
 }
 
-export const OPENROUTER_LLM_LIST: LLM[] = [CLAUDE_3_OPUS, CLAUDE_3_SONNET]
+export const OPENROUTER_LLM_LIST = [CLAUDE_3_OPUS, CLAUDE_3_SONNET]
