@@ -83,8 +83,8 @@ export const fetchOllamaModels = async () => {
 
 export const fetchOpenRouterModels = async () => {
   try {
-    // Return the static list directly
-    return OPENROUTER_LLM_LIST
+    // Return the static list directly with type assertion
+    return OPENROUTER_LLM_LIST as OpenRouterLLM[]
   } catch (error) {
     console.error("Error fetching Open Router models: " + error)
     toast.error("Error fetching Open Router models: " + error)

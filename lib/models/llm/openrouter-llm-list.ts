@@ -1,24 +1,29 @@
-import { LLM } from "@/types"
+import { LLM, OpenRouterLLM } from "@/types"
 
 const OPENROUTER_PLATFORM_LINK = "https://openrouter.ai/docs"
 
 // OpenRouter Models (UPDATED 3/27/24)
-const CLAUDE_3_OPUS: LLM = {
+const CLAUDE_3_OPUS: OpenRouterLLM = {
   modelId: "op_anthropic/claude-3-opus",
   modelName: "Claude 3 Opus",
   provider: "openrouter" as const,
   hostedId: "anthropic/claude-3-opus",
   platformLink: OPENROUTER_PLATFORM_LINK,
-  imageInput: true
+  imageInput: true,
+  maxContext: 128000
 }
 
-const CLAUDE_3_SONNET: LLM = {
+const CLAUDE_3_SONNET: OpenRouterLLM = {
   modelId: "op_anthropic/claude-3-sonnet",
   modelName: "Claude 3 Sonnet",
   provider: "openrouter" as const,
   hostedId: "anthropic/claude-3-sonnet",
   platformLink: OPENROUTER_PLATFORM_LINK,
-  imageInput: true
+  imageInput: true,
+  maxContext: 128000
 }
 
-export const OPENROUTER_LLM_LIST = [CLAUDE_3_OPUS, CLAUDE_3_SONNET]
+export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
+  CLAUDE_3_OPUS,
+  CLAUDE_3_SONNET
+]
