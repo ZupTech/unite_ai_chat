@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   title: "Login"
 }
 
-export default function LoginPage({
+const LoginPage = async ({
   searchParams
 }: {
   searchParams: { message: string }
-}) {
+}) => {
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -219,3 +219,5 @@ export default function LoginPage({
     </div>
   )
 }
+
+export default LoginPage
