@@ -4,13 +4,13 @@ const OPENROUTER_PLATFORM_LINK = "https://openrouter.ai/docs"
 
 // OpenRouter Models (UPDATED 3/27/24)
 const CLAUDE_3_OPUS: OpenRouterLLM = {
-  modelId: "op_anthropic/claude-3-opus",
-  modelName: "Claude 3 Opus",
+  modelId: "google/gemini-2.0-flash-001",
+  modelName: "Gemini 2.0 Flash",
   provider: "openrouter" as const,
-  hostedId: "anthropic/claude-3-opus",
+  hostedId: "google/gemini-2.0-flash-001",
   platformLink: OPENROUTER_PLATFORM_LINK,
   imageInput: true,
-  maxContext: 128000
+  maxContext: 1000000
 }
 
 const CLAUDE_3_SONNET: OpenRouterLLM = {
