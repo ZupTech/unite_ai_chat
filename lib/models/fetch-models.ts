@@ -3,6 +3,7 @@ import { LLM, LLMID, ModelProvider, OpenRouterLLM } from "@/types"
 import { toast } from "sonner"
 import { LLM_LIST_MAP } from "./llm/llm-list"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
+import { OPENROUTER_LLM_LIST } from "./llm/openrouter-llm-list"
 
 export const fetchHostedModels = async (profile: Tables<"profiles">) => {
   try {
@@ -82,34 +83,12 @@ export const fetchOllamaModels = async () => {
 
 export const fetchOpenRouterModels = async () => {
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/models")
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter server is not responding.`)
-    }
-
-    const { data } = await response.json()
-
-    const openRouterModels = data.map(
-      (model: {
-        id: string
-        name: string
-        context_length: number
-      }): OpenRouterLLM => ({
-        modelId: model.id as LLMID,
-        modelName: model.id,
-        provider: "openrouter",
-        hostedId: model.name,
-        platformLink: "https://openrouter.dev",
-        imageInput: false,
-        maxContext: model.context_length
-      })
-    )
-
-    return openRouterModels
+    // Return the static list directly
+    return OPENROUTER_LLM_LIST
   } catch (error) {
     console.error("Error fetching Open Router models: " + error)
     toast.error("Error fetching Open Router models: " + error)
+    return []
   }
 }
 

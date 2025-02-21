@@ -7,6 +7,7 @@ export type LLMID =
   | MistralLLMID
   | GroqLLMID
   | PerplexityLLMID
+  | OpenRouterLLMID
 
 // OpenAI Models (UPDATED 5/13/24)
 export type OpenAILLMID = "gpt-4o" | "gpt-4o-mini"
@@ -51,6 +52,11 @@ export type PerplexityLLMID =
   | "sonar-small-online" // Sonar Small Online
   | "sonar-medium-chat" // Sonar Medium Chat
   | "sonar-medium-online" // Sonar Medium Online
+
+// OPENROUTER MODELS
+export type OpenRouterLLMID =
+  | "op_anthropic/claude-3-opus"
+  | "op_anthropic/claude-3-sonnet"
 
 export interface LLM {
   modelId: LLMID
