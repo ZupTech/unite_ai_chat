@@ -15,7 +15,7 @@ const GEMINI_2_0_FLASH: OpenRouterLLM = {
 
 const CLAUDE_3_5_SONNET: OpenRouterLLM = {
   modelId: "anthropic/claude-3.5-sonnet",
-  modelName: "Claude 3 Sonnet",
+  modelName: "Claude 3.5 Sonnet",
   provider: "openrouter" as const,
   hostedId: "anthropic/claude-3-sonnet",
   platformLink: OPENROUTER_PLATFORM_LINK,
@@ -23,7 +23,40 @@ const CLAUDE_3_5_SONNET: OpenRouterLLM = {
   maxContext: 128000
 }
 
+const OPEN_AI_GPT_4o_MINI: OpenRouterLLM = {
+  modelId: "openai/gpt-4o-mini",
+  modelName: "GPT 4o mini",
+  provider: "openrouter" as const,
+  hostedId: "openai/gpt-4o-mini",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: true,
+  maxContext: 128000
+}
+
+const OPEN_AI_GPT_4o: OpenRouterLLM = {
+  modelId: "openai/gpt-4o",
+  modelName: "GPT 4o",
+  provider: "openrouter" as const,
+  hostedId: "openai/gpt-4o",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: true,
+  maxContext: 128000
+}
+
+const DEEPSEEK_V3: OpenRouterLLM = {
+  modelId: "deepseek/deepseek-chat",
+  modelName: "Deepseek V3",
+  provider: "openrouter" as const,
+  hostedId: "deepseek/deepseek-chat",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: false,
+  maxContext: 131072
+}
+
 export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   GEMINI_2_0_FLASH,
-  CLAUDE_3_5_SONNET
+  CLAUDE_3_5_SONNET,
+  OPEN_AI_GPT_4o_MINI,
+  OPEN_AI_GPT_4o,
+  DEEPSEEK_V3
 ]
