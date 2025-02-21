@@ -53,10 +53,21 @@ const DEEPSEEK_V3: OpenRouterLLM = {
   maxContext: 131072
 }
 
+const DEEPSEEK_R1: OpenRouterLLM = {
+  modelId: "deepseek/deepseek-r1",
+  modelName: "Deepseek R1",
+  provider: "openrouter" as const,
+  hostedId: "deepseek/deepseek-r1",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: false,
+  maxContext: 128000
+}
+
 export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   GEMINI_2_0_FLASH,
   CLAUDE_3_5_SONNET,
   OPEN_AI_GPT_4o_MINI,
   OPEN_AI_GPT_4o,
-  DEEPSEEK_V3
+  DEEPSEEK_V3,
+  DEEPSEEK_R1
 ]

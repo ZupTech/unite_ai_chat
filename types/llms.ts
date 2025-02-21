@@ -60,7 +60,7 @@ export type OpenRouterLLMID =
   | "openai/gpt-4o-mini"
   | "openai/gpt-4o"
   | "deepseek/deepseek-chat"
-
+  | "deepseek/deepseek-r1"
 export interface LLM {
   modelId: LLMID
   modelName: string
