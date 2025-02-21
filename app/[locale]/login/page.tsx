@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: "Login"
 }
 
-export default async function Login({
+export default function LoginPage({
   searchParams
 }: {
   searchParams: { message: string }
