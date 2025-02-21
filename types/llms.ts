@@ -1,16 +1,16 @@
 import { ModelProvider } from "."
 
 export type LLMID =
-  | OpenAILLMID
+  // | OpenAILLMID
   | GoogleLLMID
-  | AnthropicLLMID
+  //  | AnthropicLLMID
   | MistralLLMID
   | GroqLLMID
   | PerplexityLLMID
   | OpenRouterLLMID
 
 // OpenAI Models (UPDATED 5/13/24)
-export type OpenAILLMID = "gpt-4o" | "gpt-4o-mini"
+//export type OpenAILLMID = "gpt-4o" | "gpt-4o-mini"
 
 // Google Models
 export type GoogleLLMID =
@@ -20,9 +20,9 @@ export type GoogleLLMID =
   | "gemini-1.5-flash" // Gemini 1.5 Flash
 
 // Anthropic Models
-export type AnthropicLLMID =
-  | "claude-3-5-sonnet-20240620" // Claude 3.5 Sonnet
-  | "claude-3-5-haiku-20241022" // Claude 3.5 Haiku
+//export type AnthropicLLMID =
+// | "claude-3-5-sonnet-20240620" // Claude 3.5 Sonnet
+//| "claude-3-5-haiku-20241022" // Claude 3.5 Haiku
 
 // Mistral Models
 export type MistralLLMID =
