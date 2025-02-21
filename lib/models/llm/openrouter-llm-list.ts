@@ -83,6 +83,16 @@ const CLAUDE_3_5_HAIKU: OpenRouterLLM = {
   maxContext: 200000
 }
 
+const META_LLAMA_3_3_70B: OpenRouterLLM = {
+  modelId: "meta-llama/llama-3.3-70b-instruct",
+  modelName: "Meta Llama 3.3",
+  provider: "openrouter" as const,
+  hostedId: "meta-llama/llama-3.3-70b-instruct",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: false,
+  maxContext: 131072
+}
+
 export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   GEMINI_2_0_FLASH,
   CLAUDE_3_5_SONNET,

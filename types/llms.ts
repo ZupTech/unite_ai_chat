@@ -63,7 +63,7 @@ export type OpenRouterLLMID =
   | "deepseek/deepseek-chat"
   | "deepseek/deepseek-r1-distill-llama-70b"
   | "perplexity/sonar"
-
+  | "meta-llama/llama-3.3-70b-instruct"
 export interface LLM {
   modelId: LLMID
   modelName: string
