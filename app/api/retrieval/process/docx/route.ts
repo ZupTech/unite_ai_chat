@@ -25,10 +25,13 @@ export async function POST(req: Request) {
     const profile = await getServerProfile()
 
     if (embeddingsProvider === "openai") {
-      if (profile.use_azure_openai) {
-        checkApiKey(profile.azure_openai_api_key, "Azure OpenAI")
-      } else {
+      try {
         checkApiKey(profile.openai_api_key, "OpenAI")
+      } catch (error: any) {
+        error.message =
+          error.message +
+          ", make sure it is configured or else use local embeddings"
+        throw error
       }
     }
 
@@ -46,20 +49,10 @@ export async function POST(req: Request) {
 
     let embeddings: any = []
 
-    let openai
-    if (profile.use_azure_openai) {
-      openai = new OpenAI({
-        apiKey: profile.azure_openai_api_key || "",
-        baseURL: `${profile.azure_openai_endpoint}/openai/deployments/${profile.azure_openai_embeddings_id}`,
-        defaultQuery: { "api-version": "2023-12-01-preview" },
-        defaultHeaders: { "api-key": profile.azure_openai_api_key }
-      })
-    } else {
-      openai = new OpenAI({
-        apiKey: profile.openai_api_key || "",
-        organization: profile.openai_organization_id
-      })
-    }
+    const openai = new OpenAI({
+      apiKey: profile.openai_api_key || "",
+      organization: profile.openai_organization_id
+    })
 
     if (embeddingsProvider === "openai") {
       const response = await openai.embeddings.create({

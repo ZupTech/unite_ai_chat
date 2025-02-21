@@ -45,15 +45,8 @@ export default function SetupPage() {
   const [usernameAvailable, setUsernameAvailable] = useState(true)
 
   // API Step
-  const [useAzureOpenai, setUseAzureOpenai] = useState(false)
   const [openaiAPIKey, setOpenaiAPIKey] = useState("")
   const [openaiOrgID, setOpenaiOrgID] = useState("")
-  const [azureOpenaiAPIKey, setAzureOpenaiAPIKey] = useState("")
-  const [azureOpenaiEndpoint, setAzureOpenaiEndpoint] = useState("")
-  const [azureOpenai35TurboID, setAzureOpenai35TurboID] = useState("")
-  const [azureOpenai45TurboID, setAzureOpenai45TurboID] = useState("")
-  const [azureOpenai45VisionID, setAzureOpenai45VisionID] = useState("")
-  const [azureOpenaiEmbeddingsID, setAzureOpenaiEmbeddingsID] = useState("")
   const [anthropicAPIKey, setAnthropicAPIKey] = useState("")
   const [googleGeminiAPIKey, setGoogleGeminiAPIKey] = useState("")
   const [mistralAPIKey, setMistralAPIKey] = useState("")
@@ -132,14 +125,7 @@ export default function SetupPage() {
       mistral_api_key: mistralAPIKey,
       groq_api_key: groqAPIKey,
       perplexity_api_key: perplexityAPIKey,
-      openrouter_api_key: openrouterAPIKey,
-      use_azure_openai: useAzureOpenai,
-      azure_openai_api_key: azureOpenaiAPIKey,
-      azure_openai_endpoint: azureOpenaiEndpoint,
-      azure_openai_35_turbo_id: azureOpenai35TurboID,
-      azure_openai_45_turbo_id: azureOpenai45TurboID,
-      azure_openai_45_vision_id: azureOpenai45VisionID,
-      azure_openai_embeddings_id: azureOpenaiEmbeddingsID
+      openrouter_api_key: openrouterAPIKey
     }
 
     const updatedProfile = await updateProfile(profile.id, updateProfilePayload)
@@ -193,33 +179,19 @@ export default function SetupPage() {
             <APIStep
               openaiAPIKey={openaiAPIKey}
               openaiOrgID={openaiOrgID}
-              azureOpenaiAPIKey={azureOpenaiAPIKey}
-              azureOpenaiEndpoint={azureOpenaiEndpoint}
-              azureOpenai35TurboID={azureOpenai35TurboID}
-              azureOpenai45TurboID={azureOpenai45TurboID}
-              azureOpenai45VisionID={azureOpenai45VisionID}
-              azureOpenaiEmbeddingsID={azureOpenaiEmbeddingsID}
               anthropicAPIKey={anthropicAPIKey}
               googleGeminiAPIKey={googleGeminiAPIKey}
               mistralAPIKey={mistralAPIKey}
               groqAPIKey={groqAPIKey}
               perplexityAPIKey={perplexityAPIKey}
-              useAzureOpenai={useAzureOpenai}
+              openrouterAPIKey={openrouterAPIKey}
               onOpenaiAPIKeyChange={setOpenaiAPIKey}
               onOpenaiOrgIDChange={setOpenaiOrgID}
-              onAzureOpenaiAPIKeyChange={setAzureOpenaiAPIKey}
-              onAzureOpenaiEndpointChange={setAzureOpenaiEndpoint}
-              onAzureOpenai35TurboIDChange={setAzureOpenai35TurboID}
-              onAzureOpenai45TurboIDChange={setAzureOpenai45TurboID}
-              onAzureOpenai45VisionIDChange={setAzureOpenai45VisionID}
-              onAzureOpenaiEmbeddingsIDChange={setAzureOpenaiEmbeddingsID}
               onAnthropicAPIKeyChange={setAnthropicAPIKey}
               onGoogleGeminiAPIKeyChange={setGoogleGeminiAPIKey}
               onMistralAPIKeyChange={setMistralAPIKey}
               onGroqAPIKeyChange={setGroqAPIKey}
               onPerplexityAPIKeyChange={setPerplexityAPIKey}
-              onUseAzureOpenaiChange={setUseAzureOpenai}
-              openrouterAPIKey={openrouterAPIKey}
               onOpenrouterAPIKeyChange={setOpenrouterAPIKey}
             />
           </StepContainer>
