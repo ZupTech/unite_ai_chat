@@ -56,7 +56,7 @@ export type PerplexityLLMID =
 // OPENROUTER MODELS
 export type OpenRouterLLMID =
   | "google/gemini-2.0-flash-001"
-  | "op_anthropic/claude-3-sonnet"
+  | "anthropic/claude-3.5-sonnet"
 
 export interface LLM {
   modelId: LLMID
