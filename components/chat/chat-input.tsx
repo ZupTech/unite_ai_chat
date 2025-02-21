@@ -81,6 +81,15 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     }, 200) // FIX: hacky
   }, [selectedPreset, selectedAssistant])
 
+  // Check for initial prompt in localStorage
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem("unite_default_prompt")
+    if (savedPrompt && !userInput) {
+      handleInputChange(savedPrompt)
+      localStorage.removeItem("unite_default_prompt")
+    }
+  }, [])
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (!isTyping && event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()

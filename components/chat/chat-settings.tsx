@@ -3,10 +3,11 @@ import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLMID, ModelProvider } from "@/types"
 import { IconAdjustmentsHorizontal } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef } from "react"
+import { FC, useContext, useEffect, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { ChatSettingsForm } from "../ui/chat-settings-form"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { useDefaultChatSettings } from "@/lib/hooks/use-default-chat-settings"
 
 interface ChatSettingsProps {}
 
@@ -30,20 +31,16 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
     }
   }
 
+  const { model } = useDefaultChatSettings({ setChatSettings })
+
   useEffect(() => {
-    if (!chatSettings) {
-      // Set default model
-      setChatSettings({
-        model: "gpt-4o",
-        temperature: 0.7,
-        contextLength: 4096,
-        prompt: "",
-        includeProfileContext: false,
-        includeWorkspaceInstructions: false,
-        embeddingsProvider: "openai"
-      })
+    if (model && chatSettings?.model !== model) {
+      setChatSettings(prev => ({
+        ...prev,
+        model: model as LLMID
+      }))
     }
-  }, [])
+  }, [model, chatSettings?.model, setChatSettings])
 
   useEffect(() => {
     if (!chatSettings) return

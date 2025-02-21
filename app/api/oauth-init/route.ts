@@ -6,7 +6,13 @@ export async function GET(request: Request) {
   const headersList = headers()
   const protocol = headersList.get("x-forwarded-proto") || "http"
   const host = headersList.get("host") || ""
-  const redirect_uri = `${protocol}://${host}`
+
+  // Get v parameter if exists
+  const url = new URL(request.url)
+  const vParam = url.searchParams.get("v")
+
+  // Add v parameter to redirect_uri if it exists
+  const redirect_uri = `${protocol}://${host}${vParam ? `?v=${vParam}` : ""}`
 
   console.log("Constructed redirect_uri:", redirect_uri)
 

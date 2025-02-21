@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   console.log("OAuth callback route called")
   const { searchParams } = new URL(request.url)
   const code = searchParams.get("code")
+  const vParam = searchParams.get("v")
 
   if (!code) {
     return NextResponse.json({ error: "No code provided" }, { status: 400 })
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   const headersList = headers()
   const protocol = headersList.get("x-forwarded-proto") || "http"
   const host = headersList.get("host") || ""
-  const redirect_uri = `${protocol}://${host}`
+  const redirect_uri = `${protocol}://${host}${vParam ? `?v=${vParam}` : ""}`
 
   console.log("Constructed redirect_uri:", redirect_uri)
 

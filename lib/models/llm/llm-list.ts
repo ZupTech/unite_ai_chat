@@ -13,7 +13,7 @@ export const LLM_LIST: LLM[] = [
   ...GROQ_LLM_LIST,
   ...PERPLEXITY_LLM_LIST,
   ...ANTHROPIC_LLM_LIST
-]
+] as const
 
 export const LLM_LIST_MAP: Record<string, LLM[]> = {
   openai: OPENAI_LLM_LIST,

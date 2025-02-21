@@ -19,6 +19,7 @@ import {
   ChatMessage,
   ChatSettings,
   LLM,
+  LLMID,
   MessageImage,
   OpenRouterLLM,
   WorkspaceImage
@@ -26,7 +27,7 @@ import {
 import { AssistantImage } from "@/types/images/assistant-image"
 import { VALID_ENV_KEYS } from "@/types/valid-keys"
 import { useRouter } from "next/navigation"
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect, useState, useRef } from "react"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -123,6 +124,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     includeWorkspaceInstructions: true,
     embeddingsProvider: "openai"
   })
+  const [chatSettingsInitialized, setChatSettingsInitialized] = useState(false)
   const [selectedChat, setSelectedChat] = useState<Tables<"chats"> | null>(null)
   const [chatFileItems, setChatFileItems] = useState<Tables<"file_items">[]>([])
 
@@ -160,6 +162,38 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // TOOL STORE
   const [selectedTools, setSelectedTools] = useState<Tables<"tools">[]>([])
   const [toolInUse, setToolInUse] = useState<string>("none")
+
+  // Ref para tracking do último modelo
+  const lastModelRef = useRef<string | null>(null)
+
+  // Listener para mudanças no modelo no localStorage - versão simplificada
+  useEffect(() => {
+    console.log("🔧 GlobalState: Setting up model listener")
+
+    const checkStorageModel = () => {
+      const currentModel = localStorage.getItem("unite_default_model")
+
+      if (currentModel && currentModel !== lastModelRef.current) {
+        console.log("🔧 GlobalState: Model changed:", {
+          from: lastModelRef.current,
+          to: currentModel
+        })
+
+        lastModelRef.current = currentModel
+
+        setChatSettings(prev => ({
+          ...prev,
+          model: currentModel as LLMID
+        }))
+      }
+    }
+
+    // Checa a cada 100ms
+    const interval = setInterval(checkStorageModel, 100)
+
+    // Cleanup
+    return () => clearInterval(interval)
+  }, []) // Sem dependências!
 
   useEffect(() => {
     const initializeState = async () => {
@@ -219,12 +253,20 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   useEffect(() => {
     ;(async () => {
+      console.log("🔧 GlobalState: Starting initialization")
       const profile = await fetchStartingData()
 
       if (profile) {
         const hostedModelRes = await fetchHostedModels(profile)
-        if (!hostedModelRes) return
+        if (!hostedModelRes) {
+          console.log("🔧 GlobalState: No hosted models available")
+          return
+        }
 
+        console.log(
+          "🔧 GlobalState: Hosted models loaded:",
+          hostedModelRes.hostedModels.map((m: LLM) => m.modelId)
+        )
         setEnvKeyMap(hostedModelRes.envKeyMap)
         setAvailableHostedModels(hostedModelRes.hostedModels)
 
@@ -232,16 +274,30 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
           profile["openrouter_api_key"] ||
           hostedModelRes.envKeyMap["openrouter"]
         ) {
+          console.log("🔧 GlobalState: Fetching OpenRouter models...")
           const openRouterModels = await fetchOpenRouterModels()
-          if (!openRouterModels) return
-          setAvailableOpenRouterModels(openRouterModels)
+          if (openRouterModels) {
+            console.log(
+              "🔧 GlobalState: OpenRouter models loaded:",
+              openRouterModels.map((m: OpenRouterLLM) => m.modelId)
+            )
+            setAvailableOpenRouterModels(openRouterModels)
+          }
         }
-      }
 
-      if (process.env.NEXT_PUBLIC_OLLAMA_URL) {
-        const localModels = await fetchOllamaModels()
-        if (!localModels) return
-        setAvailableLocalModels(localModels)
+        if (process.env.NEXT_PUBLIC_OLLAMA_URL) {
+          console.log("🔧 GlobalState: Fetching Ollama models...")
+          const localModels = await fetchOllamaModels()
+          if (localModels) {
+            console.log(
+              "🔧 GlobalState: Ollama models loaded:",
+              localModels.map((m: LLM) => m.modelId)
+            )
+            setAvailableLocalModels(localModels)
+          }
+        }
+
+        setChatSettingsInitialized(true)
       }
     })()
   }, [])
@@ -304,7 +360,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || !chatSettingsInitialized) {
     return (
       <div className="size-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>

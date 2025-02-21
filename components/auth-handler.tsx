@@ -22,27 +22,66 @@ export function AuthHandler({ children }: AuthHandlerProps) {
     workspaces,
     setWorkspaces,
     selectedWorkspace,
-    setSelectedWorkspace
+    setSelectedWorkspace,
+    setChatSettings,
+    setUserInput
   } = useContext(ChatbotUIContext)
+
+  // Função para processar o parâmetro v
+  const processVParameter = (vParam: string) => {
+    try {
+      const decodedParams = atob(vParam)
+      const params = new URLSearchParams(decodedParams)
+      const model = params.get("model")
+      const prompt = params.get("prompt")
+
+      if (model || prompt) {
+        console.log("🔒 AuthHandler: Applying chat settings from v parameter", {
+          model,
+          prompt
+        })
+        setChatSettings(prev => ({
+          ...prev,
+          model: (model as any) || prev.model,
+          prompt: prompt || prev.prompt
+        }))
+
+        // Set initial prompt in chat input
+        if (prompt) {
+          setUserInput(prompt)
+        }
+
+        // Save to localStorage as backup
+        if (model) localStorage.setItem("unite_default_model", model)
+        if (prompt) localStorage.setItem("unite_default_prompt", prompt)
+      }
+    } catch (e) {
+      console.error("Failed to decode v parameter:", e)
+    }
+  }
 
   useEffect(() => {
     const handleAuth = async () => {
       try {
         // 1. Verificar se estamos em uma rota protegida
         const isProtectedRoute = !window.location.pathname.includes("/login")
+        const vParam = searchParams.get("v")
+
         console.log("🔒 AuthHandler: Starting auth check", {
           path: window.location.pathname,
           isProtectedRoute,
           hasCode: !!searchParams.get("code"),
           hasToken: !!localStorage.getItem("authToken"),
-          hasProfile: !!profile
+          hasProfile: !!profile,
+          hasV: !!vParam,
+          vParam
         })
 
         // 2. Se tem código OAuth, processa primeiro
         const code = searchParams.get("code")
         if (code) {
           console.log("🔒 AuthHandler: Processing OAuth code")
-          await handleOAuthCallback(code)
+          await handleOAuthCallback(code, vParam)
           return
         }
 
@@ -80,12 +119,15 @@ export function AuthHandler({ children }: AuthHandlerProps) {
           // 4.2 Se não conseguiu restaurar, inicia fluxo OAuth
           console.log("🔒 AuthHandler: Starting OAuth flow")
           localStorage.setItem("returnLocale", params.locale as string)
-          const response = await fetch(
-            `/api/oauth-init?redirect_uri=${window.location.origin}`
-          )
+          if (vParam) localStorage.setItem("unite_v_param", vParam)
+
+          const response = await fetch(`/api/oauth-init`)
           const data = await response.json()
           if (data.authUrl) {
-            window.location.href = data.authUrl
+            // Adiciona o parâmetro v à URL de auth se existir
+            const authUrl = new URL(data.authUrl)
+            if (vParam) authUrl.searchParams.set("v", vParam)
+            window.location.href = authUrl.toString()
           }
           return
         }
@@ -107,6 +149,10 @@ export function AuthHandler({ children }: AuthHandlerProps) {
           console.log("🔒 AuthHandler: Redirecting to workspace")
           const workspace = selectedWorkspace || (workspaces || [])[0]
           if (workspace) {
+            // Processa o parâmetro v se existir
+            if (vParam) {
+              processVParameter(vParam)
+            }
             router.push(`/${workspace.id}/chat`)
           }
         }
@@ -152,10 +198,12 @@ export function AuthHandler({ children }: AuthHandlerProps) {
     await initializeUserData()
   }
 
-  const handleOAuthCallback = async (code: string) => {
+  const handleOAuthCallback = async (code: string, vParam: string | null) => {
     try {
-      console.log("🔒 AuthHandler: Processing OAuth callback")
-      const response = await fetch(`/api/oauth-callback?code=${code}`)
+      console.log("🔒 AuthHandler: Processing OAuth callback", { code, vParam })
+      const response = await fetch(
+        `/api/oauth-callback?code=${code}${vParam ? `&v=${vParam}` : ""}`
+      )
       if (!response.ok) {
         throw new Error(`OAuth callback failed: ${response.status}`)
       }
@@ -170,11 +218,20 @@ export function AuthHandler({ children }: AuthHandlerProps) {
 
       await restoreSession(data.token)
 
-      // Limpar URL e restaurar locale
+      // Restaurar locale e parâmetro v
       const savedLocale = localStorage.getItem("returnLocale") || ""
+      const savedVParam = localStorage.getItem("unite_v_param")
       localStorage.removeItem("returnLocale")
-      const newPath = savedLocale ? `/${savedLocale}` : "/"
+      localStorage.removeItem("unite_v_param")
+
+      // Construir nova URL mantendo o parâmetro v
+      const newPath = `${savedLocale ? `/${savedLocale}` : "/"}${savedVParam ? `?v=${savedVParam}` : ""}`
       window.history.replaceState({}, "", newPath)
+
+      // Processar o parâmetro v se existir
+      if (savedVParam) {
+        processVParameter(savedVParam)
+      }
     } catch (error) {
       console.error("🔒 AuthHandler: OAuth callback error:", error)
       localStorage.removeItem("authToken")
@@ -218,6 +275,14 @@ export function AuthHandler({ children }: AuthHandlerProps) {
     if (homeWorkspace) {
       setSelectedWorkspace(homeWorkspace)
       console.log("🔒 AuthHandler: Redirecting to workspace:", homeWorkspace.id)
+
+      // Verificar se temos um parâmetro v salvo
+      const savedVParam = localStorage.getItem("unite_v_param")
+      if (savedVParam) {
+        processVParameter(savedVParam)
+        localStorage.removeItem("unite_v_param")
+      }
+
       router.push(`/${homeWorkspace.id}/chat`)
     }
   }

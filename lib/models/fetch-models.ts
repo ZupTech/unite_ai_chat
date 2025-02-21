@@ -1,7 +1,8 @@
 import { Tables } from "@/supabase/types"
-import { LLM, LLMID, OpenRouterLLM } from "@/types"
+import { LLM, LLMID, ModelProvider, OpenRouterLLM } from "@/types"
 import { toast } from "sonner"
 import { LLM_LIST_MAP } from "./llm/llm-list"
+import { LLM_LIST } from "@/lib/models/llm/llm-list"
 
 export const fetchHostedModels = async (profile: Tables<"profiles">) => {
   try {
@@ -109,5 +110,18 @@ export const fetchOpenRouterModels = async () => {
   } catch (error) {
     console.error("Error fetching Open Router models: " + error)
     toast.error("Error fetching Open Router models: " + error)
+  }
+}
+
+export async function fetchModels(providers: ModelProvider[]): Promise<LLM[]> {
+  try {
+    const allModels = LLM_LIST.filter(model =>
+      providers.includes(model.provider)
+    )
+
+    return allModels
+  } catch (error) {
+    console.error("Error fetching models:", error)
+    return []
   }
 }
