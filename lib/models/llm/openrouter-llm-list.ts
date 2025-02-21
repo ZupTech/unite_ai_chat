@@ -73,6 +73,16 @@ const PERPLEXITY_SONAR: OpenRouterLLM = {
   maxContext: 127000
 }
 
+const CLAUDE_3_5_HAIKU: OpenRouterLLM = {
+  modelId: "anthropic/claude-3.5-haiku",
+  modelName: "Claude 3.5 Haiku",
+  provider: "openrouter" as const,
+  hostedId: "anthropic/claude-3-haiku",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: false,
+  maxContext: 200000
+}
+
 export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   GEMINI_2_0_FLASH,
   CLAUDE_3_5_SONNET,
@@ -80,5 +90,6 @@ export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   OPEN_AI_GPT_4o,
   DEEPSEEK_V3,
   DEEPSEEK_R1,
-  PERPLEXITY_SONAR
+  PERPLEXITY_SONAR,
+  CLAUDE_3_5_HAIKU
 ]

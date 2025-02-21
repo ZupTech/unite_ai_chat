@@ -57,6 +57,7 @@ export type PerplexityLLMID =
 export type OpenRouterLLMID =
   | "google/gemini-2.0-flash-001"
   | "anthropic/claude-3.5-sonnet"
+  | "anthropic/claude-3.5-haiku"
   | "openai/gpt-4o-mini"
   | "openai/gpt-4o"
   | "deepseek/deepseek-chat"
