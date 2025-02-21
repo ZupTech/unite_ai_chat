@@ -54,7 +54,7 @@ const DEEPSEEK_V3: OpenRouterLLM = {
 }
 
 const DEEPSEEK_R1: OpenRouterLLM = {
-  modelId: "deepseek/deepseek-r1",
+  modelId: "deepseek/deepseek-r1-distill-llama-70b",
   modelName: "Deepseek R1",
   provider: "openrouter" as const,
   hostedId: "deepseek/deepseek-r1",
@@ -63,11 +63,22 @@ const DEEPSEEK_R1: OpenRouterLLM = {
   maxContext: 128000
 }
 
+const PERPLEXITY_SONAR: OpenRouterLLM = {
+  modelId: "perplexity/sonar",
+  modelName: "Perplexity Sonar",
+  provider: "openrouter" as const,
+  hostedId: "perplexity/sonar",
+  platformLink: OPENROUTER_PLATFORM_LINK,
+  imageInput: false,
+  maxContext: 127000
+}
+
 export const OPENROUTER_LLM_LIST: OpenRouterLLM[] = [
   GEMINI_2_0_FLASH,
   CLAUDE_3_5_SONNET,
   OPEN_AI_GPT_4o_MINI,
   OPEN_AI_GPT_4o,
   DEEPSEEK_V3,
-  DEEPSEEK_R1
+  DEEPSEEK_R1,
+  PERPLEXITY_SONAR
 ]

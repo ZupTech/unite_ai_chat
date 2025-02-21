@@ -230,10 +230,16 @@ export const CHAT_SETTING_LIMITS: Record<LLMID, ChatSettingLimits> = {
     MAX_TOKEN_OUTPUT_LENGTH: 8000,
     MAX_CONTEXT_LENGTH: 131072
   },
-  "deepseek/deepseek-r1": {
+  "deepseek/deepseek-r1-distill-llama-70b": {
     MIN_TEMPERATURE: 0.0,
     MAX_TEMPERATURE: 1.0,
     MAX_TOKEN_OUTPUT_LENGTH: 128000,
     MAX_CONTEXT_LENGTH: 128000
+  },
+  "perplexity/sonar": {
+    MIN_TEMPERATURE: 0.0,
+    MAX_TEMPERATURE: 1.0,
+    MAX_TOKEN_OUTPUT_LENGTH: 127000,
+    MAX_CONTEXT_LENGTH: 127000
   }
 }
