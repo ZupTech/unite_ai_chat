@@ -1,52 +1,52 @@
 -- WORKSPACES
 
 UPDATE workspaces
-SET default_model = 'gpt-4o'
-WHERE default_model = 'gpt-4o';
+SET default_model = 'openai/gpt-4o'
+WHERE default_model = 'openai/gpt-4o';
 
 UPDATE workspaces
-SET default_model = 'gpt-4o'
-WHERE default_model = 'gpt-4o';
+SET default_model = 'openai/gpt-4o'
+WHERE default_model = 'openai/gpt-4o';
 
 -- PRESETS
 
 UPDATE presets
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 UPDATE presets
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 -- ASSISTANTS
 
 UPDATE assistants
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 UPDATE assistants
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 -- CHATS
 
 UPDATE chats
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 UPDATE chats
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 -- MESSAGES
 
 UPDATE messages
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 UPDATE messages
-SET model = 'gpt-4o'
-WHERE model = 'gpt-4o';
+SET model = 'openai/gpt-4o'
+WHERE model = 'openai/gpt-4o';
 
 -- PROFILES
 
@@ -93,7 +93,7 @@ BEGIN
         TRUE,
         'Home',
         4096,
-        'gpt-4o', -- Updated default model
+        'openai/gpt-4o', -- Updated default model
         'You are a friendly, helpful AI assistant.',
         0.5,
         'My home workspace.',

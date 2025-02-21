@@ -88,7 +88,7 @@ export const CreateAssistant: FC<CreateAssistantProps> = ({
   const checkIfModelIsToolCompatible = () => {
     if (!assistantChatSettings.model) return false
 
-    const compatibleModels = ["gpt-4o"]
+    const compatibleModels = ["openai/gpt-4o"]
     const isModelCompatible = compatibleModels.includes(
       assistantChatSettings.model
     )

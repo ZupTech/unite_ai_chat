@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     })
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "openai/gpt-4o",
       messages: [
         {
           role: "system",
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         }
       ],
       temperature: 0,
-      max_tokens: CHAT_SETTING_LIMITS["gpt-4o"].MAX_TOKEN_OUTPUT_LENGTH
+      max_tokens: CHAT_SETTING_LIMITS["openai/gpt-4o"].MAX_TOKEN_OUTPUT_LENGTH
       //   response_format: { type: "json_object" }
       //   stream: true
     })
